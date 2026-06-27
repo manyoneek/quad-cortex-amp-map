@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quad Cortex Amp Map</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f0e8;
+      --ink: #171717;
+      --muted: #68635c;
+      --line: #d8d0c4;
+      --panel: #fffaf0;
+      --panel-2: #fbf6ec;
+      --red: #9b2f2f;
+      --gold: #c78320;
+      --green: #39765d;
+      --blue: #2d5f88;
+      --violet: #654a91;
+      --charcoal: #34302d;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    header {
+      min-height: 52vh;
+      display: grid;
+      align-items: end;
+      padding: 48px clamp(18px, 4vw, 64px) 28px;
+      background:
+        linear-gradient(135deg, rgba(17,17,17,.86), rgba(42,35,29,.58)),
+        url("https://neuraldsp.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F8v59tqjwwh2n%2F3EbtLMkCttzqNy5gsG5Ld0%2F35c4ff52d3af7ad867f928034847de68%2Fqc-hero.png&w=1920&q=75");
+      background-size: cover;
+      background-position: center;
+      color: #fff8ed;
+    }
+
+    .hero {
+      max-width: 980px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 8vw, 96px);
+      line-height: .92;
+      letter-spacing: 0;
+    }
+
+    .lede {
+      max-width: 760px;
+      margin: 18px 0 0;
+      font-size: clamp(17px, 2vw, 22px);
+      color: #efe1cf;
+      line-height: 1.45;
+    }
+
+    main {
+      padding: 22px clamp(14px, 3vw, 44px) 44px;
+    }
+
+    .controls {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(140px, 190px));
+      gap: 10px;
+      padding: 12px 0;
+      background: color-mix(in srgb, var(--bg) 92%, white);
+      border-bottom: 1px solid var(--line);
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+      color: var(--ink);
+      padding: 0 12px;
+      font: inherit;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 18px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chip::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 7px;
+      background: var(--tone-color);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(286px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(40, 32, 24, .07);
+    }
+
+    .bar {
+      height: 8px;
+      background: var(--tone-color);
+    }
+
+    .amp-image {
+      position: relative;
+      margin: 0;
+      aspect-ratio: 16 / 9;
+      background:
+        linear-gradient(135deg, rgba(0,0,0,.12), rgba(255,255,255,.28)),
+        var(--panel-2);
+      overflow: hidden;
+    }
+
+    .amp-image img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-fallback {
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .image-fallback a,
+    .image-credit a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .image-credit {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      background: rgba(18, 16, 14, .72);
+      color: #fff8ed;
+      font-size: 10px;
+      line-height: 1.25;
+      backdrop-filter: blur(4px);
+    }
+
+    .card-body {
+      padding: 14px;
+    }
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.18;
+    }
+
+    .origin {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 7px;
+      background: #fffdf8;
+    }
+
+    dl {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+    }
+
+    dt {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 2px;
+    }
+
+    dd {
+      margin: 0;
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    .source {
+      margin-top: 34px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .source a { color: var(--blue); }
+
+    @media (max-width: 860px) {
+      header { min-height: 44vh; padding-top: 34px; }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .controls input { grid-column: 1 / -1; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media print {
+      header { min-height: auto; color: #000; background: none; padding: 18px 0; }
+      main { padding: 0; }
+      .controls { display: none; }
+      .card { break-inside: avoid; box-shadow: none; }
+      a { color: #000; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <section class="hero">
+      <h1>Quad Cortex Amp Map</h1>
+      <p class="lede">A practical tone-first visualization of Quad Cortex guitar and bass amp algorithms, plus the current Neural Capture V2 factory amp captures. Safe names are matched to Neural DSP's official “Based on” entries.</p>
+    </section>
+  </header>
+
+  <main>
+    <section class="controls" aria-label="Filters">
+      <input id="search" type="search" placeholder="Search safe name, original amp, brand, tone...">
+      <select id="kind"><option value="">All amp kinds</option></select>
+      <select id="origin"><option value="">All origins</option></select>
+      <select id="tone"><option value="">All tone families</option></select>
+    </section>
+
+    <section class="stats" aria-label="Summary">
+      <div class="stat"><b id="visibleCount">0</b><span>visible amp families</span></div>
+      <div class="stat"><b id="brandCount">0</b><span>brands represented</span></div>
+      <div class="stat"><b id="guitarCount">0</b><span>guitar families</span></div>
+      <div class="stat"><b id="bassCount">0</b><span>bass amp/capture families</span></div>
+    </section>
+
+    <section class="legend" aria-label="Tone legend"></section>
+    <section class="grid" id="cards" aria-live="polite"></section>
+
+    <p class="source">
+      Source: Neural DSP's official <a href="https://neuraldsp.com/device-list">Quad Cortex device list</a> for safe names and “Based on” mappings, plus Neural DSP's <a href="https://neuraldsp.com/quad-cortex">Quad Cortex product page</a> for current 90+ amp/device context. Image panels use deterministic web image previews and link to image search for the exact original amp query. Tone descriptions are practical summaries based on each original amp's common use and circuit family.
+    </p>
+  </main>
+
+  <script>
+    const amps = [
+      {safe:"Bogna Uber Clean / Lead", original:"Bogner Uberschall Rev. Blue", brand:"Bogner", origin:"USA", kind:"Guitar amp", tone:"Modern high gain", expect:"Huge low end, saturated modern rock/metal gain, with a usable clean channel but really known for aggressive rhythm weight."},
+      {safe:"Bogna Vishnu 20th Clean", original:"Bogner Shiva 20th Anniversary", brand:"Bogner", origin:"USA", kind:"Guitar amp", tone:"Boutique clean/crunch", expect:"Polished boutique clean, warm mids, smooth breakup, good for roots rock, pop, blues, and refined drive pedals."},
+      {safe:"Brit 2203", original:"Marshall JCM800", brand:"Marshall", origin:"UK", kind:"Guitar amp", tone:"British crunch", expect:"The classic hard-rock roar: cutting upper mids, tight punch, and gain that rewards picking dynamics and boosts."},
+      {safe:"Brit 900 Clean / Lead", original:"Marshall JCM900 4100", brand:"Marshall", origin:"UK", kind:"Guitar amp", tone:"British high gain", expect:"Brighter, tighter 90s Marshall voice; lead channel gives sharper rock gain and the clean channel stays relatively firm."},
+      {safe:"Brit Plexi 100 Bright / Normal / Patch", original:"Marshall Super Lead 100", brand:"Marshall", origin:"UK", kind:"Guitar amp", tone:"Vintage British", expect:"Loud plexi authority, glassy top, big lows, and explosive crunch when pushed. Patch mode blends bright bite with normal-channel body."},
+      {safe:"Brit Plexi 50 Bright / Normal / Patch", original:"Marshall Lead 50", brand:"Marshall", origin:"UK", kind:"Guitar amp", tone:"Vintage British", expect:"Plexi character with a softer attack and earlier breakup than the 100-watt model. Great for classic rock and touch-sensitive leads."},
+      {safe:"Brit TM45 Bright / Normal / Patch", original:"Marshall JTM45 / Bluesbreaker family", brand:"Marshall", origin:"UK", kind:"Guitar amp", tone:"Vintage British", expect:"Rounder, bluesier Marshall roots. Warm low mids, softer compression, and creamy breakup rather than tight modern gain."},
+      {safe:"Brit UBL Lead / Lead Clip", original:"Marshall Silver Jubilee", brand:"Marshall", origin:"UK", kind:"Guitar amp", tone:"British lead", expect:"Thick Slash-era lead voice, chewy mids, smoother top end than a JCM800, with clip mode adding extra saturation."},
+      {safe:"CA 1Star Clean / Drive variants", original:"Mesa Boogie Lone Star", brand:"Mesa Boogie", origin:"USA", kind:"Guitar amp", tone:"American boutique", expect:"Big American clean and singing drive. Tweed/normal and wattage options cover glassy headroom through spongier blues-rock breakup."},
+      {safe:"CA Duo Ch3 Modern / Raw / Vintage", original:"Mesa Boogie Dual Rectifier", brand:"Mesa Boogie", origin:"USA", kind:"Guitar amp", tone:"Modern high gain", expect:"The big rectifier sound: broad lows, scooped aggression, and percussive metal rhythm. Vintage is smoother; modern is more brutal."},
+      {safe:"CA John's 2C Ch1 / Ch2 / Ch3", original:"Mesa Boogie JP2C", brand:"Mesa Boogie", origin:"USA", kind:"Guitar amp", tone:"Modern lead/metal", expect:"Petrucci-style Mark-series precision: focused mids, fast attack, tight bass, fluid leads, and articulate progressive-metal rhythm."},
+      {safe:"CA Tremo Orange / Red", original:"Mesa Boogie Trem-O-Verb", brand:"Mesa Boogie", origin:"USA", kind:"Guitar amp", tone:"Modern high gain", expect:"Rectifier-family aggression with slightly looser, darker, more characterful feel. Orange leans vintage; red is heavier."},
+      {safe:"Captain 50", original:"Morgan SW50", brand:"Morgan", origin:"USA", kind:"Guitar amp", tone:"Boutique clean/crunch", expect:"Boutique American/British hybrid clean with chime, strong pedal platform behavior, and firm low-end authority."},
+      {safe:"D-Cell H4 Ch1 Bright / Normal", original:"Diezel VH4 Ch1", brand:"Diezel", origin:"Germany", kind:"Guitar amp", tone:"Modern clean", expect:"Hi-fi German clean, tight low end, and precise attack. Useful for polished cleans and heavy rigs needing definition."},
+      {safe:"D-Cell H4 Ch2 Bright / Normal", original:"Diezel VH4 Ch2", brand:"Diezel", origin:"Germany", kind:"Guitar amp", tone:"Modern crunch", expect:"Dry, percussive crunch with dense mids. Excellent for industrial rock, hard rock, and articulate riffing."},
+      {safe:"D-Cell H4 Ch3 / Ch4", original:"Diezel VH4 Ch3 / Ch4", brand:"Diezel", origin:"Germany", kind:"Guitar amp", tone:"Modern high gain", expect:"Surgical, saturated German high gain. Ch3 is the famous tight rhythm voice; Ch4 adds fluid lead saturation."},
+      {safe:"D-Cell Hisbert Ch1 / Ch2 / Ch3", original:"Diezel Herbert", brand:"Diezel", origin:"Germany", kind:"Guitar amp", tone:"Modern high gain", expect:"Massive, polished metal sound with huge low end and controlled compression. More enormous and hi-fi than vintage British gain."},
+      {safe:"Dumbbell ODS", original:"Dumble Overdrive Special", brand:"Dumble", origin:"USA", kind:"Guitar amp", tone:"Boutique lead", expect:"Touch-sensitive clean-to-violin sustain, rich mids, and smooth overdrive. Think expressive fusion, blues, and refined lead tones."},
+      {safe:"EV101IIIS Blue / Red 6L6 & EL34", original:"EVH 5150 III 100S / 5150 III S EL34", brand:"EVH", origin:"USA", kind:"Guitar amp", tone:"Modern high gain", expect:"Blue channel is tight hot-rodded crunch; red is saturated metal lead. EL34 versions add more British bark and upper-mid grind."},
+      {safe:"Freeman 100 Clean / Rhythm / Lead", original:"Friedman HBE100", brand:"Friedman", origin:"USA", kind:"Guitar amp", tone:"Hot-rodded British", expect:"Refined modded-Marshall tone: chewy mids, polished gain, chunky rhythm, and smooth lead sustain without fizz."},
+      {safe:"Matchmore D30 Ch1 / Ch2", original:"Matchless DC30", brand:"Matchless", origin:"USA", kind:"Guitar amp", tone:"Chime/crunch", expect:"Class-A-style sparkle, fast attack, complex upper harmonics, and edge-of-breakup jangle. Great for indie, roots, and worship cleans."},
+      {safe:"Matchmore Jefe", original:"Matchless Chieftain", brand:"Matchless", origin:"USA", kind:"Guitar amp", tone:"Boutique crunch", expect:"Thicker Matchless voice with more low-mid body and smooth drive. Good for roots rock and singing single-coil leads."},
+      {safe:"PV-505 Lead / Rhythm", original:"Peavey 6505", brand:"Peavey", origin:"USA", kind:"Guitar amp", tone:"Modern high gain", expect:"Dense, aggressive metalcore and modern metal sound. Tight when boosted, grindy mids, and a familiar saturated rhythm bite."},
+      {safe:"Rols Jazz CH120", original:"Roland Jazz Chorus 120", brand:"Roland", origin:"Japan", kind:"Guitar amp", tone:"Solid-state clean", expect:"Ultra-clean, wide, bright solid-state platform. Excellent for chorus, post-punk, funk, and pristine pedal tones."},
+      {safe:"Solo 100 Crunch Bright / Crunch Normal / Lead", original:"Soldano SLO-100", brand:"Soldano", origin:"USA", kind:"Guitar amp", tone:"Hot-rodded lead", expect:"Iconic liquid lead and hard-rock crunch. Clear, harmonically rich saturation with a tight low end and vocal mids."},
+      {safe:"UK C15 Normal / TopBoost", original:"Vox AC15", brand:"Vox", origin:"UK", kind:"Guitar amp", tone:"British chime", expect:"Lower-watt Vox sparkle, early compression, jangly breakup, and expressive midrange. Great with single coils."},
+      {safe:"UK C30 Normal / TopBoost", original:"Vox AC30", brand:"Vox", origin:"UK", kind:"Guitar amp", tone:"British chime", expect:"Classic chime and top-boost bite, with bigger headroom than AC15. Works for jangly cleans, pushed pop-rock, and Brian May-style drive."},
+      {safe:"US DLX 64 Vintage / 65 Reissue", original:"Fender Deluxe Reverb", brand:"Fender", origin:"USA", kind:"Guitar amp", tone:"American clean", expect:"Scooped blackface clean, springy attack, bright top end, and sweet breakup at manageable gain. A core pedal-platform sound."},
+      {safe:"US HP Tweed TWN Bright / Normal / Patch", original:"Fender High Power Tweed Twin 5F8-A", brand:"Fender", origin:"USA", kind:"Guitar amp", tone:"Tweed clean/crunch", expect:"Big tweed punch, less scoop than blackface Fender, warm compression, and bold blues-rock breakup when pushed."},
+      {safe:"US Prince", original:"Fender Blackface Princeton Reverb", brand:"Fender", origin:"USA", kind:"Guitar amp", tone:"American clean", expect:"Compact blackface sweetness: glassy clean, soft low end, earlier breakup, and excellent small-combo feel."},
+      {safe:"US SPR Normal / Vibrato", original:"Fender Super Reverb '65", brand:"Fender", origin:"USA", kind:"Guitar amp", tone:"American clean", expect:"Big 4x10 blackface clean, scooped mids, bright snap, and blues-friendly breakup with more spread than a Deluxe."},
+      {safe:"US Tweed Basslad Bright / Normal / Patch", original:"Fender Bassman Tweed", brand:"Fender", origin:"USA", kind:"Guitar amp", tone:"Tweed crunch", expect:"Warm, open, touch-sensitive tweed roar. Great for blues, early rock, and pedals that want midrange body."},
+      {safe:"US TWN Normal / Vibrato", original:"Fender Twin Reverb", brand:"Fender", origin:"USA", kind:"Guitar amp", tone:"American clean", expect:"Huge clean headroom, bright scooped shimmer, tight lows, and classic pedal-platform authority."},
+      {safe:"Victor Squid Ch1 / Ch2", original:"Victory Kraken", brand:"Victory", origin:"UK", kind:"Guitar amp", tone:"Modern high gain", expect:"British modern metal voice. Ch1 has hot-rodded crunch; Ch2 gets thicker, darker, and more saturated."},
+      {safe:"Watt D103 Bright / Normal", original:"Hiwatt DR103", brand:"Hiwatt", origin:"UK", kind:"Guitar amp", tone:"British clean/crunch", expect:"Huge, stiff, articulate clean headroom with bold mids. Takes pedals well and stays clear under loud rock rhythm."},
+
+      {safe:"Amped Flip-Top 6464 / 6466 / 6664 / 6666", original:"Ampeg Heritage B15N", brand:"Ampeg", origin:"USA", kind:"Bass amp", tone:"Vintage bass", expect:"Round, warm, pillowy tube bass with old-school Motown character. Variants change the 1964/1966 voicing blend."},
+      {safe:"Amped Super Valve", original:"Ampeg Heritage SVT-CL", brand:"Ampeg", origin:"USA", kind:"Bass amp", tone:"Rock bass", expect:"Classic SVT authority: thick mids, tube grind, big stage low end, and mix-ready rock bass presence."},
+      {safe:"Brit Bass 50 Bright / Normal / Patch", original:"Marshall Super Bass 50", brand:"Marshall", origin:"UK", kind:"Bass amp", tone:"Vintage bass", expect:"Gritty British bass/lead crossover. Bright and normal channels cover warm thump through aggressive upper-mid grind."},
+      {safe:"CA 400+ Ch1 / Ch2", original:"Mesa Boogie Bass 400+", brand:"Mesa Boogie", origin:"USA", kind:"Bass amp", tone:"Rock bass", expect:"Big tube bass with Mesa punch, deep lows, and muscular midrange. Channel options move from cleaner body to more drive."},
+      {safe:"G800K", original:"Gallien-Krueger 800RB", brand:"Gallien-Krueger", origin:"USA", kind:"Bass amp", tone:"Modern bass", expect:"Fast, punchy solid-state bass with growly upper mids. Great for funk, punk, slap, and articulate rock lines."},
+      {safe:"Watt Bass Mod Bright / Normal", original:"Hiwatt DR103 Mod", brand:"Hiwatt", origin:"UK", kind:"Bass amp", tone:"Rock bass", expect:"Hiwatt clarity adapted for bass: clean, loud, stiff, and mid-forward with enough edge for rock mixes."},
+
+      {safe:"Brit 2203 87", original:"Marshall JCM800 1987", brand:"Marshall", origin:"UK", kind:"Neural Capture V2", tone:"British crunch", expect:"Factory V2 capture of a late-80s JCM800. Expect sharper attack, aggressive mids, and classic boosted-rock behavior."},
+      {safe:"DC Heavy Crusader", original:"Dean Costello Heavy Metal Warfare", brand:"Dean Costello Audio", origin:"USA", kind:"Neural Capture V2", tone:"Modern high gain", expect:"Boutique metal amp capture with thick saturation, tight rhythm response, and a dense wall-of-gain feel."},
+      {safe:"Dovre 50", original:"Dover Amplification DA-50", brand:"Dover Amplification", origin:"USA", kind:"Neural Capture V2", tone:"Boutique lead", expect:"Refined boutique overdrive with expressive mids and a smooth transition from clean to singing lead."},
+      {safe:"Drywood Purple Horror", original:"Driftwood Purple Nightmare", brand:"Driftwood", origin:"Germany", kind:"Neural Capture V2", tone:"Modern high gain", expect:"German boutique metal saturation, tight low end, and aggressive clarity for extended-range riffs."},
+      {safe:"ENG Feral 120", original:"ENGL Savage 120", brand:"ENGL", origin:"Germany", kind:"Neural Capture V2", tone:"Modern high gain", expect:"Tight, bright, cutting German metal with fast tracking and a polished high-gain edge."},
+      {safe:"EV101IIIS EL34", original:"EVH 5150 III S EL34", brand:"EVH", origin:"USA", kind:"Neural Capture V2", tone:"Modern high gain", expect:"5150-family saturation with more British mid bite from EL34 power. Strong for modern rock and metal."},
+      {safe:"Fryed Pit Bull 50", original:"Fryette Pittbull Fifty/CL", brand:"Fryette", origin:"USA", kind:"Neural Capture V2", tone:"Modern high gain", expect:"Dry, immediate, unforgiving articulation with tight lows and complex mids. Great when you want every riff detail exposed."},
+      {safe:"Nailer Battle 38", original:"Naylor Duel 38", brand:"Naylor", origin:"USA", kind:"Neural Capture V2", tone:"Boutique crunch", expect:"Thick boutique rock crunch, chewy mids, and a more organic feel than many modern gain amps."},
+      {safe:"RV Amp G120", original:"Revv Generator 120 MK3", brand:"Revv", origin:"Canada", kind:"Neural Capture V2", tone:"Modern high gain", expect:"Modern, controlled, studio-ready metal gain with tight tracking and polished low-end management."},
+      {safe:"US DLX 58", original:"Fender Deluxe 5E2 1958", brand:"Fender", origin:"USA", kind:"Neural Capture V2", tone:"Tweed clean/crunch", expect:"Small tweed combo warmth, early compression, ragged breakup, and vintage blues/roots character."},
+      {safe:"UK C10 64", original:"Vox AC10 1964", brand:"Vox", origin:"UK", kind:"Neural Capture V2", tone:"British chime", expect:"Small Vox jangle with low-watt compression, sweet top end, and early edge-of-breakup charm."},
+      {safe:"Gibb GA8", original:"Gibson GA-8", brand:"Gibson", origin:"USA", kind:"Neural Capture V2", tone:"Vintage clean/crunch", expect:"Loose, raw vintage combo tone with warm mids and small-amp breakup. More character than headroom."},
+      {safe:"Super Bolt", original:"Supro Thunderbolt 15 inch", brand:"Supro / Two Notes", origin:"USA", kind:"Neural Capture V2", tone:"Vintage clean/crunch", expect:"Thick vintage combo bark, strong low mids, and garage/blues breakup with a distinctive old-American voice."},
+      {safe:"Amped Super Valve Pro", original:"Ampeg SVT-2 Pro", brand:"Ampeg", origin:"USA", kind:"Neural Capture V2", tone:"Rock bass", expect:"SVT-style tube heft with more preamp shaping. Strong for aggressive rock bass and driven DI-plus-cab tones."},
+      {safe:"Bass Mark LM3", original:"Markbass Little Mark III", brand:"Markbass", origin:"Italy", kind:"Neural Capture V2", tone:"Modern bass", expect:"Clean, efficient, punchy modern bass with fast response and flexible EQ feel."},
+      {safe:"CA 400", original:"Mesa Boogie Bass 400", brand:"Mesa Boogie", origin:"USA", kind:"Neural Capture V2", tone:"Rock bass", expect:"Big tube Mesa bass with weight, grind, and low-end authority."},
+      {safe:"Peace BC1", original:"Pearce BC-1", brand:"Pearce", origin:"USA", kind:"Neural Capture V2", tone:"Modern bass", expect:"Clean, articulate preamp-style bass with a focused direct tone and strong transient definition."},
+      {safe:"Tech41 GED12", original:"Tech 21 SansAmp GED-2112", brand:"Tech 21", origin:"USA", kind:"Neural Capture V2", tone:"Rock bass", expect:"Geddy Lee-flavored parallel bass drive: bright attack, growly mids, and mix-cutting grind."}
+    ];
+
+    const toneColors = {
+      "American clean":"var(--blue)",
+      "Tweed clean/crunch":"var(--gold)",
+      "Tweed crunch":"var(--gold)",
+      "British chime":"var(--green)",
+      "Vintage British":"var(--gold)",
+      "Vintage clean/crunch":"var(--gold)",
+      "British clean/crunch":"var(--green)",
+      "British crunch":"var(--red)",
+      "British high gain":"var(--red)",
+      "British lead":"var(--red)",
+      "Boutique clean/crunch":"var(--green)",
+      "Boutique crunch":"var(--green)",
+      "Boutique lead":"var(--violet)",
+      "American boutique":"var(--blue)",
+      "Modern clean":"var(--blue)",
+      "Modern crunch":"var(--red)",
+      "Modern lead/metal":"var(--violet)",
+      "Modern high gain":"var(--charcoal)",
+      "Hot-rodded British":"var(--red)",
+      "Hot-rodded lead":"var(--violet)",
+      "Solid-state clean":"var(--blue)",
+      "Vintage bass":"var(--gold)",
+      "Rock bass":"var(--red)",
+      "Modern bass":"var(--green)"
+    };
+
+    const notableArtists = {
+      "Bogna Uber Clean / Lead": "Jerry Cantrell · Alice in Chains",
+      "Bogna Vishnu 20th Clean": "Steve Stevens · Billy Idol",
+      "Brit 2203": "Zakk Wylde · Ozzy Osbourne / Black Label Society",
+      "Brit 900 Clean / Lead": "Billy Corgan · The Smashing Pumpkins",
+      "Brit Plexi 100 Bright / Normal / Patch": "Jimi Hendrix · The Jimi Hendrix Experience",
+      "Brit Plexi 50 Bright / Normal / Patch": "Angus Young · AC/DC",
+      "Brit TM45 Bright / Normal / Patch": "Eric Clapton · John Mayall & the Bluesbreakers (Bluesbreaker combo)",
+      "Brit UBL Lead / Lead Clip": "Slash · Guns N' Roses",
+      "CA 1Star Clean / Drive variants": "Andy Timmons · Danger Danger / solo",
+      "CA Duo Ch3 Modern / Raw / Vintage": "John Petrucci · Dream Theater",
+      "CA John's 2C Ch1 / Ch2 / Ch3": "John Petrucci · Dream Theater",
+      "CA Tremo Orange / Red": "Dave Grohl · Foo Fighters",
+      "Captain 50": "Josh Smith · solo",
+      "D-Cell H4 Ch1 Bright / Normal": "Adam Jones · Tool",
+      "D-Cell H4 Ch2 Bright / Normal": "Adam Jones · Tool",
+      "D-Cell H4 Ch3 / Ch4": "Adam Jones · Tool",
+      "D-Cell Hisbert Ch1 / Ch2 / Ch3": "James Hetfield · Metallica",
+      "Dumbbell ODS": "Robben Ford · solo",
+      "EV101IIIS Blue / Red 6L6 & EL34": "Eddie Van Halen · Van Halen",
+      "Freeman 100 Clean / Rhythm / Lead": "Jerry Cantrell · Alice in Chains",
+      "Matchmore D30 Ch1 / Ch2": "The Edge · U2",
+      "Matchmore Jefe": "Tom Petty · Tom Petty and the Heartbreakers",
+      "PV-505 Lead / Rhythm": "Machine Head · Robb Flynn",
+      "Rols Jazz CH120": "Andy Summers · The Police",
+      "Solo 100 Crunch Bright / Crunch Normal / Lead": "Mark Knopfler · Dire Straits",
+      "UK C15 Normal / TopBoost": "Peter Buck · R.E.M.",
+      "UK C30 Normal / TopBoost": "Brian May · Queen",
+      "US DLX 64 Vintage / 65 Reissue": "Mike Campbell · Tom Petty and the Heartbreakers",
+      "US HP Tweed TWN Bright / Normal / Patch": "Keith Richards · The Rolling Stones",
+      "US Prince": "Jim Campilongo · solo",
+      "US SPR Normal / Vibrato": "Stevie Ray Vaughan · Double Trouble",
+      "US Tweed Basslad Bright / Normal / Patch": "Buddy Guy · solo",
+      "US TWN Normal / Vibrato": "James Burton · Elvis Presley / Ricky Nelson",
+      "Victor Squid Ch1 / Ch2": "Rabea Massaad · Toska / solo",
+      "Watt D103 Bright / Normal": "Pete Townshend · The Who",
+      "Amped Flip-Top 6464 / 6466 / 6664 / 6666": "James Jamerson · The Funk Brothers",
+      "Amped Super Valve": "Krist Novoselic · Nirvana",
+      "Brit Bass 50 Bright / Normal / Patch": "Lemmy Kilmister · Motörhead",
+      "CA 400+ Ch1 / Ch2": "Flea · Red Hot Chili Peppers",
+      "G800K": "Flea · Red Hot Chili Peppers",
+      "Watt Bass Mod Bright / Normal": "John Entwistle · The Who",
+      "Brit 2203 87": "Kerry King · Slayer",
+      "DC Heavy Crusader": "Mike Orlando · Adrenaline Mob",
+      "Dovre 50": "Eric Johnson · solo",
+      "Drywood Purple Horror": "Kristian Kohle · producer / metal guitarist",
+      "ENG Feral 120": "Ritchie Blackmore · Deep Purple",
+      "EV101IIIS EL34": "Eddie Van Halen · Van Halen",
+      "Fryed Pit Bull 50": "Stephen Carpenter · Deftones",
+      "Nailer Battle 38": "Warren Haynes · Gov't Mule / The Allman Brothers Band",
+      "RV Amp G120": "Dan Donegan · Disturbed",
+      "US DLX 58": "Neil Young · Crazy Horse",
+      "UK C10 64": "Paul Weller · The Jam / solo",
+      "Gibb GA8": "Ry Cooder · solo",
+      "Super Bolt": "Jimmy Page · Led Zeppelin",
+      "Amped Super Valve Pro": "Justin Chancellor · Tool",
+      "Bass Mark LM3": "Richard Bona · solo",
+      "CA 400": "Flea · Red Hot Chili Peppers",
+      "Peace BC1": "Geddy Lee · Rush",
+      "Tech41 GED12": "Geddy Lee · Rush"
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const controls = { search: $("search"), kind: $("kind"), origin: $("origin"), tone: $("tone") };
+    const cards = $("cards");
+    const legend = document.querySelector(".legend");
+    let imageObserver;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function imageQuery(amp) {
+      const instrument = /bass|svt|little mark|ged-2112|bc-1/i.test(`${amp.safe} ${amp.original}`) ? "bass amp" : "guitar amp";
+      return `${amp.original} ${amp.brand} ${instrument} photo`;
+    }
+
+    function imageSearchUrl(amp) {
+      return `https://www.bing.com/images/search?q=${encodeURIComponent(imageQuery(amp))}`;
+    }
+
+    function previewImageUrl(amp) {
+      return `https://tse1.mm.bing.net/th?q=${encodeURIComponent(imageQuery(amp))}&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7`;
+    }
+
+    function renderImageFallback(figure, amp) {
+      figure.innerHTML = `
+        <div class="image-fallback">
+          <a href="${escapeHtml(imageSearchUrl(amp))}" target="_blank" rel="noopener">
+            Open image search for ${escapeHtml(amp.original)}
+          </a>
+        </div>
+      `;
+    }
+
+    function hydrateFigure(figure) {
+      if (figure.dataset.loaded) return;
+      figure.dataset.loaded = "true";
+      const amp = amps[Number(figure.dataset.index)];
+      figure.innerHTML = `
+        <a href="${escapeHtml(imageSearchUrl(amp))}" target="_blank" rel="noopener">
+          <img src="${escapeHtml(previewImageUrl(amp))}" alt="${escapeHtml(amp.original)}">
+        </a>
+        <figcaption class="image-credit">Image preview · click to search exact amp</figcaption>
+      `;
+      const img = figure.querySelector("img");
+      img.addEventListener("error", () => renderImageFallback(figure, amp), { once: true });
+    }
+
+    function hydrateImages() {
+      if (imageObserver) imageObserver.disconnect();
+      imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          imageObserver.unobserve(entry.target);
+          hydrateFigure(entry.target);
+        });
+      }, { rootMargin: "700px 0px" });
+
+      document.querySelectorAll(".amp-image").forEach((figure) => imageObserver.observe(figure));
+    }
+
+    function unique(field) {
+      return [...new Set(amps.map((amp) => amp[field]))].sort((a, b) => a.localeCompare(b));
+    }
+
+    function fillSelect(select, values) {
+      values.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    fillSelect(controls.kind, unique("kind"));
+    fillSelect(controls.origin, unique("origin"));
+    fillSelect(controls.tone, unique("tone"));
+
+    unique("tone").forEach((tone) => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.style.setProperty("--tone-color", toneColors[tone] || "var(--muted)");
+      chip.textContent = tone;
+      legend.appendChild(chip);
+    });
+
+    function render() {
+      const q = controls.search.value.trim().toLowerCase();
+      const filtered = amps.filter((amp) => {
+        const text = Object.values(amp).join(" ").toLowerCase();
+        return (!q || text.includes(q))
+          && (!controls.kind.value || amp.kind === controls.kind.value)
+          && (!controls.origin.value || amp.origin === controls.origin.value)
+          && (!controls.tone.value || amp.tone === controls.tone.value);
+      });
+
+      cards.innerHTML = filtered.map((amp) => `
+        <article class="card" style="--tone-color:${toneColors[amp.tone] || "var(--muted)"}">
+          <div class="bar"></div>
+          <figure class="amp-image" data-index="${amps.indexOf(amp)}">
+            <div class="image-fallback">Loading amp image preview...</div>
+          </figure>
+          <div class="card-body">
+            <div class="title">
+              <h2>${amp.safe}</h2>
+              <span class="origin">${amp.origin}</span>
+            </div>
+            <dl>
+              <div><dt>Original amp</dt><dd>${amp.original}</dd></div>
+              <div><dt>Brand / type</dt><dd>${amp.brand} · ${amp.kind}</dd></div>
+              <div><dt>Notable artist</dt><dd>${notableArtists[amp.safe] || "Common session and touring backline reference"}</dd></div>
+              <div><dt>Tone family</dt><dd>${amp.tone}</dd></div>
+              <div><dt>What to expect</dt><dd>${amp.expect}</dd></div>
+            </dl>
+          </div>
+        </article>
+      `).join("");
+
+      $("visibleCount").textContent = filtered.length;
+      $("brandCount").textContent = new Set(filtered.map((amp) => amp.brand)).size;
+      $("guitarCount").textContent = filtered.filter((amp) => amp.kind.includes("Guitar")).length;
+      $("bassCount").textContent = filtered.filter((amp) =>
+        amp.kind.includes("Bass") || /bass|svt|little mark|ged-2112|bc-1/i.test(`${amp.safe} ${amp.original}`)
+      ).length;
+      hydrateImages();
+    }
+
+    Object.values(controls).forEach((control) => control.addEventListener("input", render));
+    render();
+  </script>
+</body>
+</html>
