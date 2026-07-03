@@ -78,6 +78,32 @@
       border-bottom: 1px solid var(--line);
     }
 
+    .tabs {
+      display: inline-flex;
+      gap: 6px;
+      padding: 5px;
+      margin: 0 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+    }
+
+    .tab {
+      min-height: 36px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--charcoal);
+      color: #fff8ed;
+    }
+
     input, select {
       width: 100%;
       min-height: 42px;
@@ -238,6 +264,31 @@
       background: #fffdf8;
     }
 
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 8px;
+    }
+
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .source-badge.original {
+      border-color: color-mix(in srgb, var(--violet) 42%, var(--line));
+      color: var(--violet);
+      background: color-mix(in srgb, var(--violet) 9%, #fffdf8);
+    }
+
     dl {
       display: grid;
       gap: 8px;
@@ -272,6 +323,8 @@
       .controls { grid-template-columns: 1fr 1fr; }
       .controls input { grid-column: 1 / -1; }
       .stats { grid-template-columns: 1fr 1fr; }
+      .tabs { display: flex; }
+      .tab { flex: 1 1 0; }
     }
 
     @media print {
@@ -292,6 +345,11 @@
   </header>
 
   <main>
+    <nav class="tabs" aria-label="Device map">
+      <button class="tab" type="button" data-view="amps" aria-selected="true">Amps</button>
+      <button class="tab" type="button" data-view="pedals" aria-selected="false">Pedals</button>
+    </nav>
+
     <section class="controls" aria-label="Filters">
       <input id="search" type="search" placeholder="Search safe name, original amp, brand, tone...">
       <select id="kind"><option value="">All amp kinds</option></select>
@@ -310,7 +368,7 @@
     <section class="grid" id="cards" aria-live="polite"></section>
 
     <p class="source">
-      Source: Neural DSP's official <a href="https://neuraldsp.com/device-list">Quad Cortex device list</a> for safe names and “Based on” mappings, plus Neural DSP's <a href="https://neuraldsp.com/quad-cortex">Quad Cortex product page</a> for current 90+ amp/device context. Image panels use deterministic web image previews and link to image search for the exact original amp query. Tone descriptions are practical summaries based on each original amp's common use and circuit family.
+      Source: Neural DSP's official <a href="https://neuraldsp.com/device-list">Quad Cortex device list</a> for safe names, categories, and “Based on” mappings, plus Neural DSP's <a href="https://neuraldsp.com/quad-cortex">Quad Cortex product page</a> for current device context. Image panels use deterministic web image previews and link to image search for the exact original device query. Tone descriptions are practical summaries based on each original device's common use and circuit family.
     </p>
   </main>
 
@@ -468,11 +526,269 @@
       "Tech41 GED12": "Geddy Lee · Rush"
     };
 
+    const pedalRows = `
+Guitar overdrive|81 Creations Drive|1981 Inventions DRV|3.3.0
+Guitar overdrive|Brit Blues|Marshall BluesBreaker|1.0.0
+Guitar overdrive|Brit Governor|Marshall Guv'nor|1.0.0
+Guitar overdrive|Chief BD2|BOSS BD-2 Blues Driver|1.0.0
+Guitar overdrive|Chief DS1|BOSS DS-1 Distortion|1.0.0
+Guitar overdrive|Chief HM2|BOSS HM-2 Heavy Metal|3.3.0
+Guitar overdrive|Chief MT|BOSS MT-2 Metal Zone|1.0.0
+Guitar overdrive|Chief OD1|BOSS OD-1 OverDrive|1.0.0
+Guitar overdrive|Chief SD1|BOSS SD-1 Super OverDrive|1.0.0
+Guitar overdrive|Exotic|Xotic BB Preamp|1.0.0
+Guitar overdrive|Exotic Z Boost|Xotic RC Booster|1.2.0
+Guitar overdrive|Facial Fuzz|Dunlop Fuzz Face|1.2.0
+Guitar overdrive|Freeman BOD|Friedman BE-OD|1.0.0
+Guitar overdrive|Fuzz Pi|Electro-Harmonix Big Muff Pi|1.0.0
+Guitar overdrive|Green 808|Ibanez TS808 Tube Screamer|1.0.0
+Guitar overdrive|Love Champion|Lovepedal Champ|3.3.0
+Guitar overdrive|Love DLX|Lovepedal 5E3 Deluxe|3.3.0
+Guitar overdrive|Love Drive 11|Lovepedal OD Eleven|3.3.0
+Guitar overdrive|Love TM|Lovepedal JTM|3.3.0
+Guitar overdrive|MK3 Silicon Fuzz|JHS Bender 1973 London|2.1.0
+Guitar overdrive|Myth Drive|Klon Centaur|1.0.0
+Guitar overdrive|No-Bell OD1|Nobels ODR-1|1.4.0
+Guitar overdrive|Obsessive Drive|Fulltone OCD|1.0.0
+Guitar overdrive|OD250|DOD Overdrive Preamp 250|1.0.0
+Guitar overdrive|Rage Booster|Dallas Rangemaster|1.0.0
+Guitar overdrive|Red Drive|Keeley Electronics Red Dirt|1.4.0
+Guitar overdrive|Rodent Drive|ProCo Rat|1.0.0
+Guitar overdrive|Thunderpaw|Mr Black Thunderclaw|2.0.0
+Guitar overdrive|TW Tube Drive|Tube Works Tube Driver|3.3.0
+Guitar overdrive|Unsound Shivver|Unsound Circuitry Shivver|3.3.0
+Guitar overdrive|Vemural Ray|Vemuram Jan Ray|1.4.0
+Bass overdrive|BDDI|Tech 21 SansAmp Bass Driver DI|1.0.0
+Bass overdrive|Exotic Bass Z Boost|Xotic RC Bass Booster|1.2.0
+Bass overdrive|Microtubes B3K|Darkglass Microtubes B3K|1.0.0
+Bass overdrive|Microtubes VMT|Darkglass Vintage Microtubes|1.0.0
+Bass overdrive|Soviet Fuzz|Electro-Harmonix Russian Big Muff|1.0.0
+Fuzz pedals|Beehive Wasp Fuzz|Beetronics Vezzpa|3.3.0
+Fuzz pedals|Iba Basic Fuzz|Ibanez No. 59 Standard Fuzz|3.3.0
+Fuzz pedals|Love Believer|Lovepedal Believe|3.3.0
+Fuzz pedals|Love Bender Mk3|Lovepedal MKIII Tonebender|3.3.0
+Fuzz pedals|Love Fuzz Lord III|Lovepedal Fuzz Master III|3.3.0
+Fuzz pedals|MKK Bass Lord|Malekko B:assmaster|3.3.0
+Fuzz pedals|Otso Bender Mk1|Otsola Mk1|3.3.0
+Fuzz pedals|Reus Bender Mk2|Reuss Germanium Bender|3.3.0
+Fuzz pedals|Trademark Fuzz|Hallmark Guitars Nu-Fuzz|3.3.0
+Fuzz pedals|Unsound Hyper Pozzum|Unsound Circuitry Hyper Pozzum|3.3.0
+Fuzz pedals|Unsound Kato|Unsound Circuitry Kato|3.3.0
+Compressor|4-Comp Custom|Handmade modified compressor inspired by Keeley Electronics 4 Knob|3.3.0
+Compressor|Bogna Bloom|Bogner Harlow|3.3.0
+Compressor|Chief CS3|BOSS CS-3 Compression Sustainer|1.4.0
+Compressor|Jewel|Diamond Compressor|1.0.0
+Compressor|Legendary 87|Universal Audio 1176|1.0.0
+Compressor|Legendary 87 (ST)|Universal Audio 1176|1.4.0
+Compressor|Legendary 87 (S/C)|Universal Audio 1176|3.0.0
+Compressor|OC-76 Comp|Origin Effects Cali76|3.3.0
+Compressor|Opto Comp||1.0.0
+Compressor|Opto Comp (ST)||1.4.0
+Compressor|Opto Comp (S/C)||3.0.0
+Compressor|Solid State Comp|SSL Bus Compressor|1.0.0
+Compressor|Solid State Comp (ST)|SSL Bus Compressor|1.4.0
+Compressor|Solid State Comp (S/C)|SSL Bus Compressor|3.0.0
+Compressor|Symmetrical Comp|Darkglass Super Symmetry 115 GeV|3.3.0
+Compressor|VCA Comp||1.0.0
+Compressor|VCA Comp (ST)||1.4.0
+Compressor|VCA Comp (S/C)||3.0.0
+Delay|Analog Delay||1.3.0
+Delay|Circular Delay||3.0.0
+Delay|Digital Delay||2.1.0
+Delay|Dual Delay||1.4.0
+Delay|Dual Reverse Delay||2.1.0
+Delay|Reverse Delay||2.1.0
+Delay|Simple Delay||2.1.0
+Delay|Simple Ping Pong Delay||1.0.0
+Delay|Slapback Delay||1.3.0
+Delay|Tape Delay||2.1.0
+Reverb|Ambience||1.0.0
+Reverb|Blossom (ST)|Inspired by Strymon BigSky Bloom mode|4.0.0
+Reverb|Cave||1.0.0
+Reverb|Hall||1.0.0
+Reverb|Mind Hall||1.2.0
+Reverb|Modulated||1.0.0
+Reverb|Nordic Concert Hall (ST)|Inspired by Valhalla VintageVerb Concert Hall mode|4.0.0
+Reverb|Plate||1.2.0
+Reverb|Plate Lush||1.2.0
+Reverb|Plate Tight||1.2.0
+Reverb|Room||1.0.0
+Reverb|Shimmer||1.1.0
+Reverb|Spring (M)||1.0.0
+Reverb|Spring (ST)||1.0.0
+Reverb|Spring Reverb Engine (M)||3.3.0
+Reverb|Spring Reverb Engine (ST)||3.3.0
+Reverb|Studio Plate 70 (ST)|Lexicon PCM70 Rich Plate programs|4.0.0
+Pitch|Aggi Sub Octaver|Aguilar Octamizer|3.3.0
+Pitch|Chief OC2|BOSS OC-2 Octave|3.1.0
+Pitch|Minivoicer||1.4.0
+Pitch|Pitch Correction||3.0.0
+Pitch|Pitch Shifter||1.0.0
+Pitch|Poly Octaver|Electro-Harmonix POG|1.0.0
+Pitch|Subharmonic Synth|Digitech DOD Meatbox SubSynth|3.1.0
+Pitch|Transpose||3.0.0
+Pitch|Wham|Digitech Whammy|1.0.0
+Modulation|Chief CE2W|BOSS CE-2W Chorus|1.3.0
+Modulation|Chief CE2W (M)|BOSS CE-2W Chorus|1.4.0
+Modulation|Chief DC2W|BOSS DC-2W Dimension|1.4.0
+Modulation|Chief DC2W (M)|BOSS DC-2W Dimension|1.4.0
+Modulation|Chorus 229T|TC Electronic TC-2290|1.3.0
+Modulation|Chorus Engine||1.3.0
+Modulation|Digital Flanger||1.1.0
+Modulation|Dream Chorus|TC Electronic Dreamscape|1.3.0
+Modulation|Dream Chorus (M)|TC Electronic Dreamscape|1.3.0
+Modulation|Dual Chorus||1.0.0
+Modulation|Flanger Engine||1.3.0
+Modulation|Flangerish||1.1.0
+Modulation|Harmonic Tremolo||3.1.0
+Modulation|Micro Processor (ST)|Eventide Micropitch Delay|3.3.0
+Modulation|MX Flanger|MXR Flanger M117R|1.3.0
+Modulation|MX Phase 95|MXR Phase 95|1.4.0
+Modulation|MX Vibes|MXR Uni-Vibe|1.0.0
+Modulation|Pattern Tremolo||3.3.0
+Modulation|Phaser||1.0.0
+Modulation|Rotary||1.0.0
+Modulation|Tremolo||1.0.0
+Modulation|Vibrato||1.0.0
+Modulation|Vintage Chorus||1.0.0
+Morph|Bit-Crusher (ST)||3.3.0
+Morph|Bit-Crusher Engine (M)||3.3.0
+Morph|Freeze||1.3.0
+Morph|Phase-Locked Loop|EarthQuaker Devices Data Corrupter|3.3.0
+Filter|Env. Filter||1.0.0
+Filter|Env. filter (S/C)||3.0.0
+Filter|Foog|Moog Moogerfooger MF-101|1.0.0
+Filter|Love Meat|Lovetone Meatball|1.0.0
+EQ|Graphic-9||1.0.0
+EQ|Low-High Cut||1.0.0
+EQ|Parametric-3||1.0.0
+EQ|Parametric-8||1.0.0
+EQ|Plugin Graphic-9||3.0.0
+Wah|Auto Wah||3.3.0
+Wah|Bad Horse|Morley Bad Horsie|1.0.0
+Wah|Bass Wah||1.0.0
+Wah|Bubba Wah|Dunlop Budda Budwah|1.0.0
+Wah|Crying Clyde Wah|Dunlop Cry Baby Clyde McCoy|1.0.0
+Wah|Crying Wah|Dunlop Cry Baby GCB-95|1.0.0
+Wah|Crying Wah From Hell|Dunlop Crybaby from Hell|3.1.0
+Synth|Mono Synth|Enhanced Overlord Synth from Archetype: Rabea X|3.3.0
+    `.trim();
+
+    const pedalCategoryColors = {
+      "Guitar overdrive":"var(--red)",
+      "Bass overdrive":"var(--green)",
+      "Fuzz pedals":"var(--charcoal)",
+      "Compressor":"var(--blue)",
+      "Delay":"var(--violet)",
+      "Reverb":"var(--gold)",
+      "Pitch":"var(--green)",
+      "Modulation":"var(--blue)",
+      "Morph":"var(--violet)",
+      "Filter":"var(--green)",
+      "EQ":"var(--charcoal)",
+      "Wah":"var(--gold)",
+      "Synth":"var(--red)"
+    };
+
+    const pedalToneByCategory = {
+      "Guitar overdrive":"Drive / distortion / boost",
+      "Bass overdrive":"Bass drive / fuzz",
+      "Fuzz pedals":"Fuzz / gated saturation",
+      "Compressor":"Dynamics",
+      "Delay":"Echo / time",
+      "Reverb":"Space / ambience",
+      "Pitch":"Pitch / octave",
+      "Modulation":"Movement",
+      "Morph":"Special effect",
+      "Filter":"Filter / envelope",
+      "EQ":"Tone shaping",
+      "Wah":"Wah / sweep",
+      "Synth":"Synth"
+    };
+
+    const categoryDescriptions = {
+      "Guitar overdrive":"Front-of-amp gain tools: boosts, classic overdrives, distortion boxes, and heavier pedal voices.",
+      "Bass overdrive":"Low-end-friendly drive and fuzz references that keep bass weight while adding grind.",
+      "Fuzz pedals":"Captured fuzz boxes, mostly Neural Capture V2 entries, from vintage bender-style circuits to gnarlier modern fuzz.",
+      "Compressor":"Dynamics processors for leveling, sustain, punch, sidechain use, or studio-style control.",
+      "Delay":"Cortex time-based delay engines, from simple repeats to reverse, tape, dual, and ping-pong movement.",
+      "Reverb":"Cortex room, hall, plate, spring, shimmer, and newer inspired algorithmic reverb engines.",
+      "Pitch":"Octave, whammy, transpose, correction, and harmonized pitch tools.",
+      "Modulation":"Chorus, flanger, phaser, vibrato, tremolo, rotary, and micro-pitch movement.",
+      "Morph":"More extreme transformations like freeze, bit crushing, and PLL-style synthy tracking.",
+      "Filter":"Envelope and resonant filter effects, including classic auto-filter references.",
+      "EQ":"Graphic, parametric, and cut EQ blocks for corrective or creative tone shaping.",
+      "Wah":"Manual and auto-wah voices, including classic Cry Baby-style and bass wah options.",
+      "Synth":"A monophonic synth block adapted from Neural's Rabea plugin ecosystem."
+    };
+
+    const brandAliases = [
+      "1981 Inventions", "Aguilar", "Beetronics", "Bogner", "BOSS", "Dallas", "Darkglass", "Diamond",
+      "Digitech", "DOD", "Dunlop", "EarthQuaker Devices", "Electro-Harmonix", "Eventide", "Friedman",
+      "Fulltone", "Hallmark", "Ibanez", "JHS", "Keeley Electronics", "Klon", "Lexicon", "Lovepedal",
+      "Lovetone", "Malekko", "Marshall", "Moog", "Morley", "Mr Black", "MXR", "Nobels", "Origin Effects",
+      "Otsola", "ProCo", "Reuss", "SSL", "Strymon", "TC Electronic", "Tech 21", "Tube Works",
+      "Universal Audio", "Unsound Circuitry", "Valhalla", "Vemuram", "Xotic"
+    ];
+
+    function pedalBrand(original) {
+      return brandAliases.find((brand) => original.startsWith(brand)) || (original ? original.split(" ")[0] : "Neural DSP");
+    }
+
+    function pedalExpect(category, original, isOriginal) {
+      const base = categoryDescriptions[category] || "Quad Cortex effect model.";
+      if (isOriginal) return `${base} This one is a Cortex original rather than a named third-party pedal model.`;
+      if (original.startsWith("Inspired by")) return `${base} Neural marks it as inspired by ${original.replace(/^Inspired by /, "")}.`;
+      return `${base} Neural lists the original reference as ${original}.`;
+    }
+
+    const pedals = pedalRows.split("\n").map((row) => {
+      const [kind, safe, original, added] = row.split("|");
+      const isOriginal = !original;
+      return {
+        safe,
+        original: isOriginal ? "Cortex original" : original,
+        brand: isOriginal ? "Neural DSP" : pedalBrand(original),
+        origin: isOriginal ? "Cortex original" : "Modeled reference",
+        kind,
+        tone: pedalToneByCategory[kind] || kind,
+        expect: pedalExpect(kind, original, isOriginal),
+        added,
+        isOriginal
+      };
+    });
+
+    const datasets = {
+      amps: {
+        title: "Quad Cortex Amp Map",
+        lede: "A practical tone-first visualization of Quad Cortex guitar and bass amp algorithms, plus the current Neural Capture V2 factory amp captures. Safe names are matched to Neural DSP's official “Based on” entries.",
+        search: "Search safe name, original amp, brand, tone...",
+        filters: ["All amp kinds", "All origins", "All tone families"],
+        stats: ["visible amp families", "brands represented", "guitar families", "bass amp/capture families"],
+        items: amps,
+        imageNoun: "amp",
+        originalLabel: "Original amp",
+        brandLabel: "Brand / type"
+      },
+      pedals: {
+        title: "Quad Cortex Pedal Map",
+        lede: "A category-first map of Quad Cortex pedal and effect models, including overdrives, fuzz captures, compressors, delay, reverb, modulation, pitch, filters, wah, synth, and Cortex-original effects.",
+        search: "Search safe name, original pedal, category, brand...",
+        filters: ["All pedal categories", "All sources", "All effect families"],
+        stats: ["visible pedal models", "brands represented", "Cortex originals", "Quad Cortex categories"],
+        items: pedals,
+        imageNoun: "pedal",
+        originalLabel: "Original pedal / source",
+        brandLabel: "Brand / category"
+      }
+    };
+
     const $ = (id) => document.getElementById(id);
     const controls = { search: $("search"), kind: $("kind"), origin: $("origin"), tone: $("tone") };
     const cards = $("cards");
     const legend = document.querySelector(".legend");
     let imageObserver;
+    let activeView = "amps";
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, (char) => ({
@@ -484,24 +800,32 @@
       }[char]));
     }
 
-    function imageQuery(amp) {
-      const instrument = /bass|svt|little mark|ged-2112|bc-1/i.test(`${amp.safe} ${amp.original}`) ? "bass amp" : "guitar amp";
-      return `${amp.original} ${amp.brand} ${instrument} photo`;
+    function colorFor(item) {
+      return toneColors[item.tone] || pedalCategoryColors[item.kind] || "var(--muted)";
     }
 
-    function imageSearchUrl(amp) {
-      return `https://www.bing.com/images/search?q=${encodeURIComponent(imageQuery(amp))}`;
+    function imageQuery(item) {
+      if (activeView === "pedals") {
+        const subject = item.isOriginal ? `${item.safe} Quad Cortex effect` : `${item.original} pedal`;
+        return `${subject} photo`;
+      }
+      const instrument = /bass|svt|little mark|ged-2112|bc-1/i.test(`${item.safe} ${item.original}`) ? "bass amp" : "guitar amp";
+      return `${item.original} ${item.brand} ${instrument} photo`;
     }
 
-    function previewImageUrl(amp) {
-      return `https://tse1.mm.bing.net/th?q=${encodeURIComponent(imageQuery(amp))}&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7`;
+    function imageSearchUrl(item) {
+      return `https://www.bing.com/images/search?q=${encodeURIComponent(imageQuery(item))}`;
     }
 
-    function renderImageFallback(figure, amp) {
+    function previewImageUrl(item) {
+      return `https://tse1.mm.bing.net/th?q=${encodeURIComponent(imageQuery(item))}&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7`;
+    }
+
+    function renderImageFallback(figure, item) {
       figure.innerHTML = `
         <div class="image-fallback">
-          <a href="${escapeHtml(imageSearchUrl(amp))}" target="_blank" rel="noopener">
-            Open image search for ${escapeHtml(amp.original)}
+          <a href="${escapeHtml(imageSearchUrl(item))}" target="_blank" rel="noopener">
+            Open image search for ${escapeHtml(item.original)}
           </a>
         </div>
       `;
@@ -510,15 +834,16 @@
     function hydrateFigure(figure) {
       if (figure.dataset.loaded) return;
       figure.dataset.loaded = "true";
-      const amp = amps[Number(figure.dataset.index)];
+      const dataset = datasets[figure.dataset.view];
+      const item = dataset.items[Number(figure.dataset.index)];
       figure.innerHTML = `
-        <a href="${escapeHtml(imageSearchUrl(amp))}" target="_blank" rel="noopener">
-          <img src="${escapeHtml(previewImageUrl(amp))}" alt="${escapeHtml(amp.original)}">
+        <a href="${escapeHtml(imageSearchUrl(item))}" target="_blank" rel="noopener">
+          <img src="${escapeHtml(previewImageUrl(item))}" alt="${escapeHtml(item.original)}">
         </a>
-        <figcaption class="image-credit">Image preview · click to search exact amp</figcaption>
+        <figcaption class="image-credit">Image preview · click to search exact ${dataset.imageNoun}</figcaption>
       `;
       const img = figure.querySelector("img");
-      img.addEventListener("error", () => renderImageFallback(figure, amp), { once: true });
+      img.addEventListener("error", () => renderImageFallback(figure, item), { once: true });
     }
 
     function hydrateImages() {
@@ -534,11 +859,16 @@
       document.querySelectorAll(".amp-image").forEach((figure) => imageObserver.observe(figure));
     }
 
-    function unique(field) {
-      return [...new Set(amps.map((amp) => amp[field]))].sort((a, b) => a.localeCompare(b));
+    function unique(items, field) {
+      return [...new Set(items.map((item) => item[field]))].sort((a, b) => a.localeCompare(b));
     }
 
-    function fillSelect(select, values) {
+    function fillSelect(select, values, label) {
+      select.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = label;
+      select.appendChild(empty);
       values.forEach((value) => {
         const option = document.createElement("option");
         option.value = value;
@@ -547,61 +877,103 @@
       });
     }
 
-    fillSelect(controls.kind, unique("kind"));
-    fillSelect(controls.origin, unique("origin"));
-    fillSelect(controls.tone, unique("tone"));
+    function configureView() {
+      const dataset = datasets[activeView];
+      document.title = dataset.title;
+      document.querySelector("h1").textContent = dataset.title;
+      document.querySelector(".lede").textContent = dataset.lede;
+      controls.search.placeholder = dataset.search;
+      fillSelect(controls.kind, unique(dataset.items, "kind"), dataset.filters[0]);
+      fillSelect(controls.origin, unique(dataset.items, "origin"), dataset.filters[1]);
+      fillSelect(controls.tone, unique(dataset.items, "tone"), dataset.filters[2]);
+      controls.search.value = "";
+      controls.kind.value = "";
+      controls.origin.value = "";
+      controls.tone.value = "";
+      renderLegend();
+      render();
+    }
 
-    unique("tone").forEach((tone) => {
-      const chip = document.createElement("span");
-      chip.className = "chip";
-      chip.style.setProperty("--tone-color", toneColors[tone] || "var(--muted)");
-      chip.textContent = tone;
-      legend.appendChild(chip);
-    });
+    function renderLegend() {
+      const dataset = datasets[activeView];
+      legend.innerHTML = "";
+      unique(dataset.items, "tone").forEach((tone) => {
+        const sample = dataset.items.find((item) => item.tone === tone);
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.style.setProperty("--tone-color", colorFor(sample));
+        chip.textContent = tone;
+        legend.appendChild(chip);
+      });
+    }
 
     function render() {
+      const dataset = datasets[activeView];
       const q = controls.search.value.trim().toLowerCase();
-      const filtered = amps.filter((amp) => {
-        const text = Object.values(amp).join(" ").toLowerCase();
+      const filtered = dataset.items.filter((item) => {
+        const text = Object.values(item).join(" ").toLowerCase();
         return (!q || text.includes(q))
-          && (!controls.kind.value || amp.kind === controls.kind.value)
-          && (!controls.origin.value || amp.origin === controls.origin.value)
-          && (!controls.tone.value || amp.tone === controls.tone.value);
+          && (!controls.kind.value || item.kind === controls.kind.value)
+          && (!controls.origin.value || item.origin === controls.origin.value)
+          && (!controls.tone.value || item.tone === controls.tone.value);
       });
 
-      cards.innerHTML = filtered.map((amp) => `
-        <article class="card" style="--tone-color:${toneColors[amp.tone] || "var(--muted)"}">
+      cards.innerHTML = filtered.map((item) => `
+        <article class="card" style="--tone-color:${colorFor(item)}">
           <div class="bar"></div>
-          <figure class="amp-image" data-index="${amps.indexOf(amp)}">
-            <div class="image-fallback">Loading amp image preview...</div>
+          <figure class="amp-image" data-view="${activeView}" data-index="${dataset.items.indexOf(item)}">
+            <div class="image-fallback">Loading ${escapeHtml(dataset.imageNoun)} image preview...</div>
           </figure>
           <div class="card-body">
             <div class="title">
-              <h2>${amp.safe}</h2>
-              <span class="origin">${amp.origin}</span>
+              <h2>${escapeHtml(item.safe)}</h2>
+              <span class="origin">${escapeHtml(activeView === "pedals" ? item.added : item.origin)}</span>
             </div>
+            ${activeView === "pedals" ? `
+              <div class="badge-row">
+                <span class="source-badge${item.isOriginal ? " original" : ""}">${escapeHtml(item.origin)}</span>
+                <span class="source-badge">CorOS ${escapeHtml(item.added)}</span>
+              </div>
+            ` : ""}
             <dl>
-              <div><dt>Original amp</dt><dd>${amp.original}</dd></div>
-              <div><dt>Brand / type</dt><dd>${amp.brand} · ${amp.kind}</dd></div>
-              <div><dt>Notable artist</dt><dd>${notableArtists[amp.safe] || "Common session and touring backline reference"}</dd></div>
-              <div><dt>Tone family</dt><dd>${amp.tone}</dd></div>
-              <div><dt>What to expect</dt><dd>${amp.expect}</dd></div>
+              <div><dt>${dataset.originalLabel}</dt><dd>${escapeHtml(item.original)}</dd></div>
+              <div><dt>${dataset.brandLabel}</dt><dd>${escapeHtml(item.brand)} · ${escapeHtml(item.kind)}</dd></div>
+              ${activeView === "amps" ? `<div><dt>Notable artist</dt><dd>${escapeHtml(notableArtists[item.safe] || "Common session and touring backline reference")}</dd></div>` : ""}
+              <div><dt>${activeView === "pedals" ? "Effect family" : "Tone family"}</dt><dd>${escapeHtml(item.tone)}</dd></div>
+              <div><dt>What to expect</dt><dd>${escapeHtml(item.expect)}</dd></div>
             </dl>
           </div>
         </article>
       `).join("");
 
       $("visibleCount").textContent = filtered.length;
-      $("brandCount").textContent = new Set(filtered.map((amp) => amp.brand)).size;
-      $("guitarCount").textContent = filtered.filter((amp) => amp.kind.includes("Guitar")).length;
-      $("bassCount").textContent = filtered.filter((amp) =>
-        amp.kind.includes("Bass") || /bass|svt|little mark|ged-2112|bc-1/i.test(`${amp.safe} ${amp.original}`)
-      ).length;
+      $("brandCount").textContent = new Set(filtered.map((item) => item.brand)).size;
+      $("guitarCount").textContent = activeView === "pedals"
+        ? filtered.filter((item) => item.isOriginal).length
+        : filtered.filter((item) => item.kind.includes("Guitar")).length;
+      $("bassCount").textContent = activeView === "pedals"
+        ? new Set(filtered.map((item) => item.kind)).size
+        : filtered.filter((item) =>
+            item.kind.includes("Bass") || /bass|svt|little mark|ged-2112|bc-1/i.test(`${item.safe} ${item.original}`)
+          ).length;
+      document.querySelectorAll(".stat span").forEach((span, index) => {
+        span.textContent = dataset.stats[index];
+      });
       hydrateImages();
     }
 
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        activeView = tab.dataset.view;
+        document.querySelectorAll(".tab").forEach((other) => {
+          other.setAttribute("aria-selected", String(other === tab));
+        });
+        configureView();
+      });
+    });
+
     Object.values(controls).forEach((control) => control.addEventListener("input", render));
-    render();
+    configureView();
   </script>
 </body>
 </html>
